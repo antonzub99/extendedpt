@@ -1,0 +1,2 @@
+C:\Users\anton\Documents\SkCourses\extendedpt\Debug\extendedpt.exe
+C:\Users\anton\Documents\SkCourses\extendedpt\Debug\extendedpt.pdb
