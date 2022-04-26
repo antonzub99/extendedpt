@@ -1,6 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <cmath>
 #include "utils.h"
 #include "texture.h"
 #include "pdf.h"
@@ -54,8 +55,8 @@ public:
 	double scattering_pdf(
 		const ray& r_in, const hit_record& rec, const ray& scattered
 	) const {
-		auto cosine = dot(rec.normal, unit_vector(scattered.direction()));
-		return cosine < 0 ? 0 : cosine / PI;
+		auto cosine = max(dot(rec.normal, unit_vector(scattered.direction())), 0.0);
+		return cosine / PI;
 	}
 
 public: 
@@ -67,10 +68,42 @@ public:
 	phong(const color& a, double shine) : albedo(make_shared<solid_color>(a)), shininess(shine) {}
 	phong(shared_ptr<texture> a, double shine) : albedo(a), shininess(shine) {}
 
+	virtual bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec
+	) const override {
+		auto mirror = reflect(unit_vector(r_in.direction()), rec.normal);
+		srec.is_specular = false;
+		srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
+		srec.pdf_ptr = make_shared<phong_pdf>(mirror, shininess);
+		return true;
+	}
+	double scattering_pdf(
+		const ray& r_in, const hit_record& rec, const ray& scattered
+	) const {
+		auto mirror_reflect = reflect(unit_vector(r_in.direction()), rec.normal);
+		auto cosine = max(dot(unit_vector(scattered.direction()), rec.normal), 0.0f);
+		auto factor = dot(unit_vector(scattered.direction()), mirror_reflect);
+		auto brdf = max(pow(factor, shininess), 0.0);
+		return (shininess + 1) * brdf * cosine / (2 * PI);
+	}
+
+public:
+	shared_ptr<texture> albedo;
+	double shininess;
+};
+
+class blinn_phong : public material {
+public:
+	blinn_phong(const color& a, double shine, double rd, double rs) : albedo(make_shared<solid_color>(a)), shininess(shine),
+		rho_diffuse(rd), rho_spec(rs) {}
+	blinn_phong(shared_ptr<texture> a, double shine, double rd, double rs) : albedo(a), shininess(shine),
+		rho_diffuse(rd), rho_spec(rs) {}
+
 	virtual bool scatter(
 		const ray& r_in, const hit_record& rec, scatter_record& srec
 	) const override {
-		srec.is_specular = true;
+		vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+		srec.specular_ray = ray(rec.p, reflected);
+		srec.is_specular = false;
 		srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
 		srec.pdf_ptr = make_shared<phong_pdf>(rec.normal, shininess);
 		return true;
@@ -79,6 +112,7 @@ public:
 	double scattering_pdf(
 		const ray& r_in, const hit_record& rec, const ray& scattered
 	) const {
+		auto coin = random_double();
 		auto prod = dot(rec.normal, unit_vector(scattered.direction()));
 		auto pdf_val = pow(prod, shininess);
 		return prod < 0 ? 0 : (shininess + 1) * pdf_val / (2 * PI);
@@ -87,6 +121,8 @@ public:
 public:
 	shared_ptr<texture> albedo;
 	double shininess;
+	double rho_diffuse;
+	double rho_spec;
 };
 
 class metal : public material {

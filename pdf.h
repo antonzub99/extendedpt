@@ -45,6 +45,7 @@ public:
 	virtual ~pdf() {}
 
 	virtual double value(const vec3& direction) const = 0;
+	//virtual double value(const vec3& direction, const vec3& reflected) const = 0;
 	virtual vec3 generate() const = 0;
 };
 
@@ -74,8 +75,8 @@ public:
 
 	virtual double value(const vec3& direction) const override {
 		auto cosine = dot(unit_vector(direction), uvw.w());
-		auto pdf_val = pow(cosine, shininess);
-		return cosine < 0 ? 0 : (shininess + 1) * pdf_val / (2 * PI);
+		auto factor = cosine < 0 ? 0 : pow(cosine, shininess);
+		return (shininess + 1) * factor / (2 * PI);
 	}
 
 	virtual vec3 generate() const override {

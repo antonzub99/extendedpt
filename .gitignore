@@ -4,4 +4,6 @@ image_lights.ppm
 image1.ppm
 Debug/img_light.ppm
 Debug/image1.ppm
+*.png
+*.ppm
 Debug/img_bsdf.ppm
