@@ -55,7 +55,7 @@ public:
 
 	virtual double value(const vec3& direction) const override {
 		auto cosine = dot(unit_vector(direction), uvw.w());
-		return (cosine <= 0) ? 0 : cosine / PI;
+		return max(cosine, 0.0) / PI;
 	}
 
 	virtual vec3 generate() const override {
@@ -74,9 +74,31 @@ public:
 	}
 
 	virtual double value(const vec3& direction) const override {
-		auto cosine = dot(unit_vector(direction), uvw.w());
-		auto factor = cosine < 0 ? 0 : pow(cosine, shininess);
+		auto cosine = max(dot(unit_vector(direction), uvw.w()), 0.0);
+		auto factor = pow(cosine, shininess);
 		return (shininess + 1) * factor / (2 * PI);
+	}
+
+	virtual vec3 generate() const override {
+		return uvw.local(random_to_lobe(shininess));
+	}
+
+public:
+	onb uvw;
+	double shininess;
+};
+
+class blinn_phong_pdf : public pdf {
+public:
+	blinn_phong_pdf(const vec3& w, double shine) {
+		uvw.build_from_w(w);
+		shininess = shine;
+	}
+
+	virtual double value(const vec3& direction) const override {
+		auto cosine = max(dot(direction, uvw.w()), 0.0);
+		auto normalpdf = (shininess + 1) * pow(cosine, shininess) / (2 * PI);
+		return normalpdf;
 	}
 
 	virtual vec3 generate() const override {
