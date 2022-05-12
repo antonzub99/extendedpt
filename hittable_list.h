@@ -2,6 +2,7 @@
 #define HITTABLE_LIST_H
 
 #include "hittable.h"
+#include "rng.h"
 #include <memory>
 #include <vector>
 
@@ -19,7 +20,7 @@ public:
 	virtual bool hit(
 		const ray& r, double t_min, double t_max, hit_record& rec) const override;
 	
-	virtual double pdf_value(const vec3& o, const vec3& v) const override;
+	virtual double pdf_value(const point3& o, const vec3& v) const override;
 	virtual vec3 random(const vec3& o) const override;
 public:
 	std::vector<shared_ptr<hittable>> objects;

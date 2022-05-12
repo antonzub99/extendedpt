@@ -1,7 +1,4 @@
-#include "hittable_list.h"
-#include "sphere.h"
-#include "camera.h"
-#include "color.h"
+#include "renderer.h"
 #include "utils.h"
 #include "material.h"
 
@@ -83,64 +80,6 @@ hittable_list simplest_scene(const point3& loc, const double& radius, const colo
 	return objects;
 }
 
-/*
-color Li(
-	const ray& r,
-	const hittable& world,
-	shared_ptr<hittable>& lights,
-	RenderSetup setup
-) {	
-	hit_record rec;
-
-	if (!world.hit(r, 0.0001, infty, rec)) return setup.background;
-	scatter_record srec;
-}
-
-color ray_color(
-	const ray& r,
-	const color& background,
-	const hittable& world,
-	shared_ptr<hittable>& lights,
-	color& throughput,
-	int depth,
-	const Strategy mode
-) {
-	hit_record rec;
-
-	if (depth > 100) return color(0, 0, 0);
-	if (!world.hit(r, 0.001, infty, rec)) return background;
-
-	scatter_record srec;
-	color emitted = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
-	if (!rec.mat_ptr->sample(r.direction(), rec, srec)) return emitted;
-
-	auto p = max(throughput.x, max(throughput.y, throughput.z));
-	if (random_double() > p) {
-		return color(0, 0, 0);
-	}
-	else throughput *= 1 / p;
-
-	if (srec.is_specular) {
-		auto attenuation = rec.mat_ptr->eval(r.direction(), rec, srec.specular_ray.direction());
-		return throughput * attenuation * ray_color(srec.specular_ray, background, world, lights, throughput, depth, mode);
-	}
-
-	if (mode == BRDF) {
-		throughput = throughput * rec.mat_ptr->eval(r.direction(), rec, srec.scattered);
-		auto pdf_val = rec.mat_ptr->pdf(r.direction(), rec, srec);
-		auto scattered_ray = ray(rec.p, srec.scattered);
-		return emitted + throughput * ray_color(scattered_ray, background, world, lights, throughput, depth, mode) / pdf_val;
-	}
-
-	if (mode == LIGHT) {
-
-	}
-
-	if (mode == MIS) {
-
-	}
-}
-*/
 
 color ray_color(
 	const ray& r, 
@@ -250,27 +189,14 @@ color ray_color(
 
 int main(int argc, char *argv[]) {
 	const int samples_per_pixel = atoi(argv[1]);
-	const int regime = atoi(argv[2]);
-	//Strategy mode;
-	//if (regime == 0) mode = BRDF;
-	//else mode = LIGHT;
-	//const Strategy mode = BRDF;
-	int depth = 30;
-	const color background(0.0, 0.0, 0.0);
+	//const int regime = atoi(argv[2]);
+	
+	//const color background(0.0, 0.0, 0.0);
 
-	/*
-	RenderSetup setup;
-	setup.init_depth = 0;
-	setup.throughput = color(1.0, 1.0, 1.0);
-	setup.background = background;
-	setup.mode = mode;
-	setup.num_samples = samples_per_pixel;
-	*/
 	const auto asp_ratio = 16.0 / 9.0;
 	const int img_width = 500;
 	const int img_height = static_cast<int>(img_width / asp_ratio);
-	const int max_depth = 10;
-	
+	//const int max_depth = 10;
 
 	const point3 loc = point3(50, 681.6-0.27, 81.6);
 	const double radius = 600;
@@ -286,7 +212,10 @@ int main(int argc, char *argv[]) {
 	auto vfov = 30;
 	camera cam(lookfrom, lookat, vup, vfov, asp_ratio);
 
-
+	Renderer render(samples_per_pixel, asp_ratio, img_width);
+	PathMISIntegrator simple;
+	render.render_image(cam, simple, world, lights);
+	/*
 	std::cout << "P3\n" << img_width << ' ' << img_height << "\n255\n";
 	for (auto j = img_height - 1; j >= 0; --j) {
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
@@ -302,13 +231,14 @@ int main(int argc, char *argv[]) {
 			
 			write_color(std::cout, clr, 1);
 			
-			/*
+			
 			auto u = (i + random_double()) / (img_width - 1);
 			auto v = (j + random_double()) / (img_height - 1);
 			ray r = cam.get_ray(u, v);
 			auto pixel_color = Li(r, world, lights, setup);
-			*/
+			
 		}
 	}
-	std::cerr << "\nDone.\n";
+	*/
+	
 }

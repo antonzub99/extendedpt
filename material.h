@@ -130,26 +130,6 @@ public:
 		return srec.pdf_ptr->value(srec.scattered);
 	}
 	
-	
-	/*
-	virtual bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec
-	) const override {
-		auto mirror = reflect(unit_vector(r_in.direction()), rec.normal);
-		srec.is_specular = false;
-		srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
-		srec.pdf_ptr = make_shared<phong_pdf>(mirror, shininess);
-		return true;
-	}
-	double scattering_pdf(
-		const ray& r_in, const hit_record& rec, const ray& scattered
-	) const {
-		auto mirror_reflect = reflect(unit_vector(r_in.direction()), rec.normal);
-		auto cosine = max(dot(unit_vector(scattered.direction()), rec.normal), 0.0f);
-		auto factor = dot(unit_vector(scattered.direction()), mirror_reflect);
-		auto brdf = max(pow(factor, shininess), 0.0);
-		return (shininess + 1) * brdf * cosine / (2 * PI);
-	}
-	*/
 public:
 	shared_ptr<texture> albedo;
 	double shininess;

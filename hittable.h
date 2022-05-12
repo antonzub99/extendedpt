@@ -27,7 +27,6 @@ public:
 	virtual double pdf_value(const point3& o, const vec3& v) const {
 		return 0.0;
 	}
-
 	virtual vec3 random(const vec3& o) const {
 		return vec3(1, 0, 0);
 	}

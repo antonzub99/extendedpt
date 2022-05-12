@@ -9,7 +9,7 @@
 class sphere : public hittable {
 public:
 	sphere() {}
-	sphere(point3 center, double r, shared_ptr<material> m) 
+	sphere(point3 center, double r, shared_ptr<material> m)
 		: center(center), radius(r), mat_ptr(m) {};
 
 	virtual bool hit(
@@ -81,6 +81,5 @@ vec3 sphere::random(const point3& o) const {
 	uvw.build_from_w(direction);
 	return uvw.local(random_to_sphere(radius, distance_squared));
 }
-
 
 #endif

@@ -12,6 +12,7 @@
 // along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //==============================================================================================
 
+#include "utils.h"
 #include <cmath>
 #include <iostream>
 
@@ -49,6 +50,10 @@ public:
         return *this *= 1 / t;
     }
 
+    vec3 abs() const {
+        return vec3(fabs(e[0]), fabs(e[1]), fabs(e[2]));
+    }
+    
     double length() const {
         return sqrt(length_squared());
     }
@@ -126,6 +131,10 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(vec3 v) {
     return v / v.length();
+}
+
+inline double max_comp(const vec3& v) {
+    return max(v.e[0], max(v.e[1], v.e[2]));
 }
 
 inline vec3 reflect(const vec3& v, const vec3& n) {
