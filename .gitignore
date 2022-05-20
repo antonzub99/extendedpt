@@ -1,6 +1,4 @@
 *.png
 *.ppm
-Debug/*.ppm
-Debug/*.png
-Debug/
-.vs/
+Debug
+.vs
