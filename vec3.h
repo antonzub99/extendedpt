@@ -19,6 +19,65 @@
 using std::sqrt;
 using std::fabs;
 
+class vec2 {
+public:
+    vec2() : e{ 0,0 } {}
+    vec2(double e0, double e1) : e{ e0,e1 } {}
+
+    double x() const { return e[0]; }
+    double y() const { return e[1]; }
+
+    vec2 operator-() const { return vec2(-e[0], -e[1]); }
+    double operator[](int i) const { return e[i]; }
+    double& operator[](int i) { return e[i]; }
+
+    vec2& operator+=(const vec2& v) {
+        e[0] += v.e[0];
+        e[1] += v.e[1];
+        return *this;
+    }
+
+    vec2& operator*=(const double t) {
+        e[0] *= t;
+        e[1] *= t;
+        return *this;
+    }
+
+    vec2& operator/=(const double t) {
+        return *this *= 1 / t;
+    }
+
+    vec2 abs() const {
+        return vec2(fabs(e[0]), fabs(e[1]));
+    }
+
+    double length() const {
+        return sqrt(length_squared());
+    }
+
+    double length_squared() const {
+        return e[0] * e[0] + e[1] * e[1];
+    }
+
+    bool near_zero() const {
+        // Return true if the vector is close to zero in all dimensions.
+        const auto s = 1e-8;
+        return (fabs(e[0]) < s) && (fabs(e[1]) < s);
+    }
+
+    inline static vec2 random() {
+        return vec2(random_double(), random_double());
+    }
+
+    inline static vec2 random(double min, double max) {
+        return vec2(random_double(min, max), random_double(min, max));
+
+    }
+
+public:
+    double e[2];
+};
+
 class vec3 {
 public:
     vec3() : e{ 0,0,0 } {}
@@ -121,6 +180,10 @@ inline double dot(const vec3& u, const vec3& v) {
     return u.e[0] * v.e[0]
         + u.e[1] * v.e[1]
         + u.e[2] * v.e[2];
+}
+
+inline double luminance(const color& c) {
+    return (0.2126 * c.x() + 0.7152 * c.y() + 0.0722 * c.z());
 }
 
 inline vec3 cross(const vec3& u, const vec3& v) {

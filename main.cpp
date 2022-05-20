@@ -33,7 +33,7 @@ hittable_list simple_scene(const point3& loc, const double& radius, const color&
 
 
 	objects.add(make_shared<sphere>(point3(1e5+1, 40.8, 81.6), 1e5, material_left));
-	objects.add(make_shared<sphere>(point3(-1e5 + 99, 40.8, 81.6), 1e5, material_forth));
+	//objects.add(make_shared<sphere>(point3(-1e5 + 99, 40.8, 81.6), 1e5, material_forth));
 	objects.add(make_shared<sphere>(point3(50, 40.8, 1e5), 1e5, material_back));
 	//objects.add(make_shared<sphere>(point3(50, 40.8, -1e5+170), 1e5, material_front));
 	objects.add(make_shared<sphere>(point3(50, 1e5, 81.6), 1e5, material_bot));
@@ -41,7 +41,7 @@ hittable_list simple_scene(const point3& loc, const double& radius, const color&
 	objects.add(make_shared<sphere>(point3(27, 16.5, 47), 16.5, material_first));
 	objects.add(make_shared<sphere>(point3(73, 16.5, 78), 16.5, material_second));
 	objects.add(make_shared<sphere>(point3(51, 18.5, 90), 10.5, material_third));
-	//objects.add(make_shared<sphere>(point3(39, 5.5, 120), 15.5, material_forth));
+	objects.add(make_shared<sphere>(point3(39, 5.5, 120), 15.5, material_forth));
 	objects.add(make_shared<sphere>(loc, radius, difflight));
 	return objects;
 }
@@ -152,43 +152,11 @@ color ray_color(
 
 	}
 	return color(0, 0, 0);
-
-	/*
-	if (mode == MIS) {
-
-	}
-
-	auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
-	auto material_ptr = srec.pdf_ptr;
-
-	ray scattered_mat = ray(rec.p, material_ptr->generate());
-	auto mat_val = material_ptr->value(scattered_mat.direction());
-
-	ray scattered_light = ray(rec.p, light_ptr->generate());
-	auto light_val = light_ptr->value(scattered_light.direction());
-
-	auto weight = 0.0;
-	auto pdf_val = 0.0;
-	auto scattered = ray(rec.p, vec3());
-	
-	if (strategy == 0) {
-		weight = num_samples_0 * mat_val / (num_samples_0 * mat_val + num_samples_1 * light_val);
-		scattered = scattered_mat;
-		pdf_val = mat_val;
-	}
-	else {
-		weight = num_samples_1 * light_val / (num_samples_0 * mat_val + num_samples_1 * light_val);
-		scattered = scattered_light;
-		pdf_val = light_val;
-	}
-
-	return emitted + weight * srec.attenuation * rec.mat_ptr->scattering_pdf(r, rec, scattered) * ray_color(scattered, background, world, lights, depth - 1, 
-		strategy, num_samples_0, num_samples_1) / pdf_val;
-	*/
 }
 
 int main(int argc, char *argv[]) {
 	const int samples_per_pixel = atoi(argv[1]);
+	const int pool_size = atoi(argv[2]);
 	//const int regime = atoi(argv[2]);
 	
 	//const color background(0.0, 0.0, 0.0);
@@ -213,32 +181,12 @@ int main(int argc, char *argv[]) {
 	camera cam(lookfrom, lookat, vup, vfov, asp_ratio);
 
 	Renderer render(samples_per_pixel, asp_ratio, img_width);
-	PathMISIntegrator simple;
-	render.render_image(cam, simple, world, lights);
-	/*
-	std::cout << "P3\n" << img_width << ' ' << img_height << "\n255\n";
-	for (auto j = img_height - 1; j >= 0; --j) {
-		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-		for (auto i = 0; i < img_width; ++i) {
-			color clr(0, 0, 0);
-			for (auto s = 0; s < samples_per_pixel; ++s) {
-				auto u = (i + random_double()) / (img_width - 1);
-				auto v = (j + random_double()) / (img_height - 1);
-				ray r = cam.get_ray(u, v);
-				clr += ray_color(r, background, world, lights, depth, regime, samples_per_pixel);
-			}
-			clr /= samples_per_pixel;
-			
-			write_color(std::cout, clr, 1);
-			
-			
-			auto u = (i + random_double()) / (img_width - 1);
-			auto v = (j + random_double()) / (img_height - 1);
-			ray r = cam.get_ray(u, v);
-			auto pixel_color = Li(r, world, lights, setup);
-			
-		}
-	}
-	*/
-	
+	//AmbientOcclusionIntegrator simple;
+	//RISMaterial ris(pool_size, 1);
+	//PathTracerMaterials mats;
+	//SimplePT pt;
+	RISSimplePT rispt(pool_size, 1);
+	BaseRNG sampler(samples_per_pixel);
+	render.render_image(cam, rispt, world, sampler, lights);
+	return 0;
 }

@@ -21,6 +21,7 @@ public:
 		camera& cam,
 		Integrator& evaluator,
 		const hittable& world,
+		Sampler& sampler,
 		shared_ptr<hittable>& lights
 	) const {
 		color output(0, 0, 0);
@@ -32,12 +33,13 @@ public:
 		recursive_rays.max_depth = 100;
 		recursive_rays.start_roulette = 5;
 		recursive_rays.prob = 1.0;
+		int max_depth = 5;
 
 		for (auto sample = 0; sample < n_samples; ++sample) {
 			auto new_u = (u + random_double()) / (pic_width - 1);
 			auto new_v = (v + random_double()) / (pic_height - 1);
 			ray r = cam.get_ray(new_u, new_v);
-			output += evaluator.Li(r, world, lights, recursive_rays);
+			output += evaluator.Li(r, world, sampler, lights, max_depth);
 		}
 		return output;
 	}
@@ -46,6 +48,7 @@ public:
 		camera& cam, 
 		Integrator& evaluator,
 		const hittable& world,
+		Sampler& sampler,
 		shared_ptr<hittable>& lights) const {
 
 		std::cout << "P3\n" << pic_width << ' ' << pic_height << "\n255\n";
@@ -53,7 +56,7 @@ public:
 		for (auto j = pic_height - 1; j >= 0; --j) {
 			std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 			for (auto i = 0; i < pic_width; ++i) {
-				auto clr = Renderer::render_pixel(i, j, num_samples, cam, evaluator, world, lights);
+				auto clr = Renderer::render_pixel(i, j, num_samples, cam, evaluator, world, sampler, lights);
 				write_color(std::cout, clr, num_samples);
 			}
 		}

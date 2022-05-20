@@ -49,6 +49,23 @@ public:
 	virtual vec3 generate() const = 0;
 };
 
+
+class hemisphere_pdf : public pdf {
+public:
+	hemisphere_pdf(const vec3& w) { uvw.build_from_w(w); }
+
+	virtual double value(const vec3& direction) const override {
+		return 1 / PI;
+	}
+
+	virtual vec3 generate() const override {
+		return uvw.local(random_in_hemisphere(uvw.w()));
+	}
+
+public:
+	onb uvw;
+};
+
 class cosine_pdf : public pdf{
 public:
 	cosine_pdf(const vec3& w) { uvw.build_from_w(w); }

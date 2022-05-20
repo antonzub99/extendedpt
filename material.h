@@ -71,7 +71,8 @@ public:
 		const vec3& r_in, const hit_record& rec, scatter_record& srec
 	) const override {
 		srec.is_specular = false;
-		srec.pdf_ptr = make_shared<cosine_pdf>(rec.normal);
+		//srec.pdf_ptr = make_shared<cosine_pdf>(rec.normal);
+		srec.pdf_ptr = make_shared<hemisphere_pdf>(rec.normal);
 		srec.scattered = srec.pdf_ptr->generate();
 		return true;
 	}
@@ -111,7 +112,8 @@ public:
 	) const override {
 		auto mirror = reflect(unit_vector(r_in), rec.normal);
 		srec.is_specular = false;
-		srec.pdf_ptr = make_shared<phong_pdf>(mirror, shininess);
+		//srec.pdf_ptr = make_shared<phong_pdf>(mirror, shininess);
+		srec.pdf_ptr = make_shared<hemisphere_pdf>(rec.normal);
 		srec.scattered = srec.pdf_ptr->generate();
 		return true;
 	}
@@ -146,7 +148,8 @@ public:
 		const vec3& r_in, const hit_record& rec, scatter_record& srec
 	) const override {
 		srec.is_specular = false;
-		srec.pdf_ptr = make_shared<blinn_phong_pdf>(rec.normal, shininess);
+		//srec.pdf_ptr = make_shared<blinn_phong_pdf>(rec.normal, shininess);
+		srec.pdf_ptr = make_shared<hemisphere_pdf>(rec.normal);
 		auto new_normal = srec.pdf_ptr->generate();
 
 		srec.scattered = reflect(unit_vector(r_in), new_normal);
@@ -168,38 +171,14 @@ public:
 	double pdf(
 		const vec3& r_in, const hit_record& rec, const scatter_record& srec
 	) const {
-		auto randomnormal = unit_vector(-unit_vector(r_in) + unit_vector(srec.scattered));
-		auto normalpdf = srec.pdf_ptr->value(randomnormal);
-		return normalpdf / (4 * dot(-r_in, randomnormal));
+		//auto randomnormal = unit_vector(-unit_vector(r_in) + unit_vector(srec.scattered));
+		//auto normalpdf = srec.pdf_ptr->value(randomnormal);
+		//return normalpdf / (4 * dot(-r_in, randomnormal));
+		return srec.pdf_ptr->value(srec.scattered);
 	}
-
-
-	/*
-	virtual bool scatter(
-		const ray& r_in, const hit_record& rec, scatter_record& srec
-	) const override {
-		vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
-		srec.specular_ray = ray(rec.p, reflected);
-		srec.is_specular = false;
-		srec.attenuation = albedo->value(rec.u, rec.v, rec.p);
-		srec.pdf_ptr = make_shared<phong_pdf>(rec.normal, shininess);
-		return true;
-	}
-
-	double scattering_pdf(
-		const ray& r_in, const hit_record& rec, const ray& scattered
-	) const {
-		auto coin = random_double();
-		auto prod = dot(rec.normal, unit_vector(scattered.direction()));
-		auto pdf_val = pow(prod, shininess);
-		return prod < 0 ? 0 : (shininess + 1) * pdf_val / (2 * PI);
-	}
-	*/
 public:
 	shared_ptr<texture> albedo;
 	double shininess;
-	//double rho_diffuse;
-	//double rho_spec;
 };
 
 
@@ -212,7 +191,6 @@ public:
 	) const override {
 		vec3 reflected = reflect(unit_vector(r_in), rec.normal);
 		srec.specular_ray = ray(rec.p, reflected + fuzz * random_in_unit_sphere());
-		//srec.attenuation = albedo;
 		srec.is_specular = true;
 		srec.pdf_ptr = nullptr;
 		return true;
@@ -238,8 +216,6 @@ public:
 	) const override {
 		srec.is_specular = true;
 		srec.pdf_ptr = nullptr;
-		//srec.attenuation = color(1.0, 1.0, 1.0);
-
 		double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
 		vec3 unit_direction = unit_vector(r_in);

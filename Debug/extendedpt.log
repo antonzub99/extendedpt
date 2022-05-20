@@ -1,2 +1,5 @@
 ﻿  main.cpp
+C:\Users\anton\Documents\SkCourses\extendedpt\utils.h(24,14): warning C4018: <: несоответствие типов со знаком и без знака
+  sphere.cpp
+  Создание кода...
   extendedpt.vcxproj -> C:\Users\anton\Documents\SkCourses\extendedpt\Debug\extendedpt.exe
